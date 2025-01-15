@@ -22,12 +22,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { registerUser } from "./action";
 
 export default function Register() {
-  const formSchema = z.object(RegisterSchema);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -35,8 +34,14 @@ export default function Register() {
     },
   });
 
-  const handleFormSubmit = () => {
-    console.log("form");
+  const handleFormSubmit = async (data: z.infer<typeof RegisterSchema>) => {
+    const inputValue = {
+      email: data.email,
+      password: data.password,
+      passwordConfirm: data.passwordConfirm,
+    };
+    const response = await registerUser(inputValue);
+    console.log(response);
   };
 
   return (
@@ -48,7 +53,10 @@ export default function Register() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+            <form
+              onSubmit={form.handleSubmit(handleFormSubmit)}
+              className="flex flex-col gap-2"
+            >
               <FormField
                 control={form.control}
                 name="email"
