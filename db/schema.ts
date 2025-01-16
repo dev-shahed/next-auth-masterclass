@@ -1,6 +1,10 @@
-import { usersTable } from "./userSchema";
+import { pgTable, serial, text, timestamp, boolean } from "drizzle-orm/pg-core";
 
-// Export all tables as a schema
-export const schema = {
-  usersTable,
-};
+export const usersTable = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").unique(),
+  password: text("password"),
+  createdAt: timestamp("createdAt").defaultNow(),
+  twoFactorSecret: text("2fa_secret"),
+  twoFactorActivated: boolean("2fa_activated").default(false),
+});
