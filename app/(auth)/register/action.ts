@@ -5,11 +5,12 @@ import { registerFormTypes, RegisterSchema } from "../schema";
 import { usersTable } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
+import { handleError } from "@/lib/handleError";
 
-// This function registers the user
 export const registerUser = async (data: registerFormTypes) => {
-  // Validate the input data using the RegisterSchema
   const { email, password, passwordConfirm } = data || {};
+
+  // Validate the input data using the RegisterSchema
   const newUserValidation = RegisterSchema.safeParse({
     email: email,
     password: password,
@@ -19,29 +20,29 @@ export const registerUser = async (data: registerFormTypes) => {
   if (!newUserValidation.success) {
     return {
       error: true,
+      type: "validation_error",
       message:
-        newUserValidation.error.issues[0]?.message ?? "An error occurred",
+        newUserValidation.error.issues[0]?.message ?? "Validation error occurred",
     };
   }
 
-  // hash the password...
+  // Hash the password
   const hashedPassword = await hash(data.password, 10);
-  // Insert the validated data into the database
+
+  // Attempt to insert data into the database
   try {
     await db.insert(usersTable).values({
       email: email,
       password: hashedPassword,
     });
-    // Trigger revalidation after the user is successfully registered
+
+    // Trigger revalidation after successful registration
     revalidatePath("/");
     return {
       error: false,
       message: "Registered successfully",
     };
   } catch (error) {
-    return {
-      error: true,
-      message: error || "An error occurred during registration",
-    };
+    return handleError(error!);
   }
 };
