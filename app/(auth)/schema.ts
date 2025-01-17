@@ -21,16 +21,22 @@ export const passwordMatchSchema = z
     }
   });
 
-// Define the register schema
+// Define register schema
 export const RegisterSchema = z
   .object({
     email: z.string().email("Invalid email address"),
   })
   .and(passwordMatchSchema);
 
-// types of login form fields..
-export type registerFormTypes = {
+// Define login schema..
+export const LoginSchema = z.object({
+  email: z.string().email("Invalid email Address"),
+  password: passwordSchema,
+});
+
+// types of form fields...
+export type formTypes = {
   email: string;
   password: string;
-  passwordConfirm: string;
+  passwordConfirm?: string;
 };

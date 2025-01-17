@@ -106,7 +106,13 @@ type ErrorResponse = {
           type: "constraint_violation",
           message: "A constraint violation occurred in the database operation.",
         };
-  
+        case "invalid_crads":
+        return {
+          error: true,
+          type: "invalid_crads",
+          message: "Incorrect email or password",
+        };
+
       // Extend with additional database-specific or application-level cases as needed
       default:
         break;

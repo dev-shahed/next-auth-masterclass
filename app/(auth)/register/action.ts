@@ -1,16 +1,16 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { registerFormTypes, RegisterSchema } from "../schema";
+import { formTypes, RegisterSchema } from "../schema";
 import { usersTable } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
 import { handleError } from "@/lib/handleError";
 
-export const registerUser = async (data: registerFormTypes) => {
+export const registerUser = async (data: formTypes) => {
   const { email, password, passwordConfirm } = data || {};
 
-  // Validate the input data using the RegisterSchema
+  // Validate the input data..
   const newUserValidation = RegisterSchema.safeParse({
     email: email,
     password: password,
@@ -22,7 +22,8 @@ export const registerUser = async (data: registerFormTypes) => {
       error: true,
       type: "validation_error",
       message:
-        newUserValidation.error.issues[0]?.message ?? "Validation error occurred",
+        newUserValidation.error.issues[0]?.message ??
+        "Validation error occurred",
     };
   }
 
