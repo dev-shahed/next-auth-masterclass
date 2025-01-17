@@ -23,8 +23,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { registerUser } from "./action";
+import { useToast } from "@/hooks/use-toast";
+import { showToast } from "@/components/ui/showtoast";
 
 export default function Register() {
+  const toast = useToast();
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -41,7 +44,11 @@ export default function Register() {
       passwordConfirm: data.passwordConfirm,
     };
     const response = await registerUser(inputValue);
-    console.log(response);
+    if (!response.error) {
+      showToast(toast, { ...response, message: String(response.message) }, "success");
+    } else {
+      showToast(toast, { ...response, message: String(response.message) }, "error");
+    }
   };
 
   return (
