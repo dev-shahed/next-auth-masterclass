@@ -53,11 +53,9 @@ export default function Register() {
         "success"
       );
     } else {
-      showToast(
-        toast,
-        { ...response, message: String(response.message) },
-        "error"
-      );
+      form.setError("root", {
+        message: response.message,
+      });
     }
   };
 
@@ -114,6 +112,11 @@ export default function Register() {
                     </FormItem>
                   )}
                 />
+                {!!form.formState.errors.root?.message && (
+                  <FormMessage>
+                    {form.formState.errors.root.message}
+                  </FormMessage>
+                )}
                 <Button type="submit">Register</Button>
               </fieldset>
             </form>
