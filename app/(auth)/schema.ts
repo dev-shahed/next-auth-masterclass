@@ -40,3 +40,17 @@ export type formTypes = {
   password: string;
   passwordConfirm?: string;
 };
+
+// Change password form...
+export const changePasswordSchema = z
+  .object({
+    currentPassword: passwordSchema,
+  })
+  .and(passwordMatchSchema);
+
+// types of change password form fields...
+export type ChangePasswordFormTypes = {
+  currentPassword: string;
+  password: string;
+  passwordConfirm: string;
+};

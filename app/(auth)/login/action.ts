@@ -11,7 +11,10 @@ export const loginWithCredentials = async (data: formTypes) => {
   });
 
   if (!loginUserValidation.success) {
-    return handleError({ name: "ValidationError" });
+    return handleError({
+      name: "ValidationError",
+      message: loginUserValidation.error.issues[0]?.message,
+    });
   }
 
   try {

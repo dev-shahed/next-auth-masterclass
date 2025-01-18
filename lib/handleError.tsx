@@ -14,7 +14,7 @@ export const handleError = (error: { code?: string; name?: string; message?: str
   }
 
   // Map common PostgreSQL error codes
-  switch (error.code) {
+  switch (error.code || error.name) {
     case "23505": // Duplicate key violation
       return {
         error: true,

@@ -30,6 +30,7 @@ export default async function MyAccount() {
           <CardDescription>{user.email}</CardDescription>
         </CardHeader>
         <CardContent>
+        <pre>{JSON.stringify(session, null, 2)}</pre>
           <LogoutBtn />
         </CardContent>
       </Card>

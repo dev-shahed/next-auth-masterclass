@@ -6,11 +6,24 @@ import { eq } from "drizzle-orm";
 import { compare } from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      session.user.id = token.id as string;
+      return session;
+    },
+  },
   providers: [
     Credentials({
       credentials: {
         email: {},
         password: {},
+        token: {},
       },
       async authorize(credentials) {
         const [user] = await db
@@ -19,14 +32,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .where(eq(usersTable.email, credentials.email as string));
 
         if (!user) {
-          throw new Error("incorrect Credentials..");
+          throw new Error("Incorrect credentials");
         } else {
           const passwordCorrect = await compare(
             credentials.password as string,
             user.password!
           );
           if (!passwordCorrect) {
-            throw new Error("incorrect Credentials..");
+            throw new Error("Incorrect credentials");
           }
         }
 
