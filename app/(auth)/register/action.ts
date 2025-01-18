@@ -18,13 +18,7 @@ export const registerUser = async (data: formTypes) => {
   });
 
   if (!newUserValidation.success) {
-    return {
-      error: true,
-      type: "validation_error",
-      message:
-        newUserValidation.error.issues[0]?.message ??
-        "Validation error occurred",
-    };
+    return handleError({ name: "ValidationError" });
   }
 
   // Hash the password

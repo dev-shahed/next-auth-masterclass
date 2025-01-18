@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { registerUser } from "./action";
 import { useToast } from "@/hooks/use-toast";
 import { showToast } from "@/components/ui/showtoast";
+import Link from "next/link";
 
 export default function Register() {
   const toast = useToast();
@@ -117,6 +119,14 @@ export default function Register() {
             </form>
           </Form>
         </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <div className="text-muted-foreground text-sm">
+            Already have an account?{" "}
+            <Link href={"/login"} className="underline">
+              Login
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </main>
   );

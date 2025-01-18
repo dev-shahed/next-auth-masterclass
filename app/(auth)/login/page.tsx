@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -26,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { showToast } from "@/components/ui/showtoast";
 import { loginWithCredentials } from "./action";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Login() {
   const router = useRouter();
@@ -110,6 +112,20 @@ export default function Login() {
             </form>
           </Form>
         </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <div className="text-muted-foreground text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href={"/register"} className="underline">
+              Register
+            </Link>
+          </div>
+          <div className="text-muted-foreground text-sm">
+            Forget your password?{" "}
+            <Link href={"/reset-password"} className="underline">
+              Reset Password
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </main>
   );
