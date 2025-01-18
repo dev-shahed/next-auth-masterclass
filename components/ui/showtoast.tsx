@@ -1,3 +1,5 @@
+'use client'
+
 type ToastType = "success" | "error";
 
 export const showToast = (
