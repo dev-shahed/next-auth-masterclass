@@ -18,6 +18,7 @@ import { z } from "zod";
 import { showToast } from "@/components/ui/showtoast";
 import { useToast } from "@/hooks/use-toast";
 import { updatePassword } from "./action";
+import Link from "next/link";
 
 type Props = {
   token: string;
@@ -60,44 +61,52 @@ export default function FormElement({ token }: Props) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-        <fieldset
-          disabled={form.formState.isSubmitting}
-          className="flex flex-col gap-2"
-        >
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>New Password</FormLabel>
-                <FormControl>
-                  <Input {...field} type="password" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="passwordConfirm"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm New Password</FormLabel>
-                <FormControl>
-                  <Input {...field} type="password" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {!!form.formState.errors.root?.message && (
-            <FormMessage>{form.formState.errors.root.message}</FormMessage>
-          )}
-          <Button type="submit">Submit</Button>
-        </fieldset>
-      </form>
-    </Form>
+    <>
+      {form.formState.isSubmitSuccessful ? (
+        <div>
+          <Link className="underlined text-blue-500" href={"/login"}>Login to your account</Link>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+            <fieldset
+              disabled={form.formState.isSubmitting}
+              className="flex flex-col gap-2"
+            >
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="password" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="passwordConfirm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm New Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="password" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {!!form.formState.errors.root?.message && (
+                <FormMessage>{form.formState.errors.root.message}</FormMessage>
+              )}
+              <Button type="submit">Submit</Button>
+            </fieldset>
+          </form>
+        </Form>
+      )}
+    </>
   );
 }
