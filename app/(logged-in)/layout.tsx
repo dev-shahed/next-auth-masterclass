@@ -16,7 +16,7 @@ export default async function LoggedInLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" suppressHydrationWarning>
       <nav className="bg-gray-200 flex justify-between p-4 items-center">
         <ul className="flex gap-4">
           <li>

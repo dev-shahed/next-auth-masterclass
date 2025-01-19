@@ -1,11 +1,19 @@
 import { z } from "zod";
 
+// Define a reusable email validation schema
+const emailValidation = z.string().email("Invalid email address");
+
+// Define the email schema as an object for specific use cases
+export const emailSchema = z.object({
+  email: emailValidation,
+});
+
 // Define the individual password schema
 export const passwordSchema = z
   .string()
   .min(5, "Password must contain at least 5 characters");
 
-// Define password match schema..
+// Define password match schema
 export const passwordMatchSchema = z
   .object({
     password: passwordSchema,
@@ -22,33 +30,31 @@ export const passwordMatchSchema = z
   });
 
 // Define register schema
-export const RegisterSchema = z
-  .object({
-    email: z.string().email("Invalid email address"),
-  })
-  .and(passwordMatchSchema);
+export const RegisterSchema = z.object({
+  email: emailValidation,
+}).and(passwordMatchSchema);
 
-// Define login schema..
+// Define login schema
 export const LoginSchema = z.object({
-  email: z.string().email("Invalid email Address"),
+  email: emailValidation,
   password: passwordSchema,
 });
 
-// types of form fields...
+// Define types for form fields
 export type formTypes = {
   email: string;
   password: string;
   passwordConfirm?: string;
 };
 
-// Change password form...
+// Define change password schema
 export const changePasswordSchema = z
   .object({
     currentPassword: passwordSchema,
   })
   .and(passwordMatchSchema);
 
-// types of change password form fields...
+// Define types for change password form fields
 export type ChangePasswordFormTypes = {
   currentPassword: string;
   password: string;

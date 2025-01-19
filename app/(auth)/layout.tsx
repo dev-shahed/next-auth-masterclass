@@ -11,5 +11,5 @@ export default async function LogOutLayout({
   if (authenticated) {
     redirect("/my-account");
   }
-  return <>{children}</>;
+  return <main suppressHydrationWarning>{children}</main>;
 }
