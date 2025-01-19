@@ -58,9 +58,12 @@ export default function PasswordReset() {
           <CardContent>
             If you have an account with us you will receive a password reset
             email at: <br />
-            <span className="underline font-semibold">
+            <a
+              href={`mailto:${form.getValues("email")}`}
+              className="underline font-semibold"
+            >
               {form.getValues("email")}
-            </span>
+            </a>
           </CardContent>
         </Card>
       ) : (
