@@ -8,6 +8,7 @@ export default async function LogOutLayout({
   children: React.ReactNode;
 }) {
   const authenticated = await isAuthenticated();
+
   if (authenticated) {
     redirect("/my-account");
   }

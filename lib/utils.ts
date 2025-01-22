@@ -20,8 +20,17 @@ export async function isAuthenticated() {
   }
 }
 
-//check update password token is valid or not..
+export async function loggedInUser() {
+  const session = await auth();
+  const { user } = session || {};
+  try {
+    if (user !== null && user?.email && user?.id) return user;
+  } catch {
+    return null;
+  }
+}
 
+//check update password token is valid or not..
 export const IsTokenIsValid = async (token: string) => {
   if (token) {
     const [passwordResetToken] = await db

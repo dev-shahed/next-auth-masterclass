@@ -4,7 +4,11 @@ type ErrorResponse = {
   message: string;
 };
 
-export const handleError = (error: { code?: string; name?: string; message?: string }): ErrorResponse => {
+export const handleError = (error: {
+  code?: string;
+  name?: string;
+  message?: string;
+}): ErrorResponse => {
   if (!error) {
     return {
       error: true,
@@ -62,7 +66,8 @@ export const handleError = (error: { code?: string; name?: string; message?: str
       return {
         error: true,
         type: "permission_error",
-        message: "You do not have the necessary permissions to perform this action.",
+        message:
+          "You do not have the necessary permissions to perform this action.",
       };
 
     case "40001": // Serialization failure (e.g., deadlock)
@@ -83,7 +88,8 @@ export const handleError = (error: { code?: string; name?: string; message?: str
       return {
         error: true,
         type: "server_recovery",
-        message: "The database server is in recovery mode. Please try again later.",
+        message:
+          "The database server is in recovery mode. Please try again later.",
       };
 
     case "invalid_crads": // Custom error case
@@ -111,6 +117,14 @@ export const handleError = (error: { code?: string; name?: string; message?: str
       error: true,
       type: "unauthorized_error",
       message: "You are not authorized to perform this action.",
+    };
+  }
+
+  if (error.name === "NotFound") {
+    return {
+      error: true,
+      type: "notfound_error",
+      message: "User Not Found!",
     };
   }
 
