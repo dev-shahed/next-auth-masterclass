@@ -12,7 +12,7 @@ export const loginWithCredentials = async (data: formTypes) => {
   const loginUserValidation = LoginSchema.safeParse({
     email,
     password,
-    token
+    token,
   });
 
   if (!loginUserValidation.success) {
@@ -29,13 +29,16 @@ export const loginWithCredentials = async (data: formTypes) => {
       token,
       redirect: false, // Prevent automatic redirection
     });
-
     return {
       error: false,
       message: "Logged in successfully",
     };
-  } catch {
-    return handleError({ code: "invalid_crads" });
+  } catch (error: unknown) {
+    const message = (error as { cause?: { err?: { message?: string } } })?.cause
+      ?.err?.message;
+    return message
+      ? { error: true, message }
+      : handleError({ code: "invalid_crads" });
   }
 };
 

@@ -86,6 +86,7 @@ export default function Login() {
       password: form.getValues("password"),
       token: otp,
     });
+    console.log(response);
     showToast(toast, response);
     if (response?.error) return;
     if (!response?.error) {
@@ -174,13 +175,9 @@ export default function Login() {
         </Card>
       )}
       {step === 2 && (
-        <Card className="w-[450px]">
+        <Card>
           <CardHeader>
             <CardTitle>One Time Passcode</CardTitle>
-            <CardDescription>
-              Login to your account via Authentication code from Google
-              Authenticator
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <OtpForm

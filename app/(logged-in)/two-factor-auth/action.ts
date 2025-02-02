@@ -1,46 +1,28 @@
 "use server";
 
-import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { usersTable } from "@/db/usersSchema";
+import { handleError } from "@/lib/handleError";
+import { getUserByEmail, loggedInUser } from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import { authenticator } from "otplib";
 import speakeasy from "speakeasy";
 
 export const get2faSecret = async () => {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return {
-      error: true,
-      message: "Unauthorized",
-    };
+  const loggedUser = await loggedInUser();
+  if (!loggedUser) {
+    return handleError({ name: "NotFound" });
   }
+  const userResult = await getUserByEmail(loggedUser?.email as string);
+  const { twoFactorSecret: dbSecret } = userResult.user ?? {};
 
-  const [user] = await db
-    .select({
-      twoFactorSecret: usersTable.twoFactorSecret,
-    })
-    .from(usersTable)
-    .where(eq(usersTable.id, parseInt(session.user.id)));
-
-  if (!user) {
-    return {
-      error: true,
-      message: "User not found",
-    };
-  }
-
-  let twoFactorSecret = user.twoFactorSecret;
-
+  let twoFactorSecret = dbSecret;
   const token1Test = authenticator.generateSecret();
-  // if authenticator.generateSecret doesn't work, try this line instead:
-  // note you'll need to `npm i speakeasy && npm i -D @types/speakeasy`
   const generatedSecret = speakeasy.generateSecret({ length: 10 });
   const token2Test = generatedSecret.base32;
 
-  console.log({ token1Test });
-  console.log({ token2Test });
+  // console.log({ token1Test });
+  // console.log({ token2Test });
 
   if (!twoFactorSecret) {
     twoFactorSecret = authenticator.generateSecret();
@@ -49,45 +31,35 @@ export const get2faSecret = async () => {
       .set({
         twoFactorSecret,
       })
-      .where(eq(usersTable.id, parseInt(session.user.id)));
+      .where(eq(usersTable.id, parseInt(loggedUser?.id as string)));
+  }
+
+  if (token1Test === token2Test) {
+    return {
+      error: true,
+      message: "Token is not valid",
+    };
   }
 
   return {
     twoFactorSecret: authenticator.keyuri(
-      session.user.email ?? "",
-      "WebDevEducation",
-      twoFactorSecret
+      loggedUser?.email ?? "",
+      "auth-app",
+      twoFactorSecret ?? ""
     ),
   };
 };
 
 export const activate2fa = async (token: string) => {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return {
-      error: true,
-      message: "Unauthorized",
-    };
+  const loggedUser = await loggedInUser();
+  if (!loggedUser) {
+    return handleError({ name: "NotFound" });
   }
+  const userResult = await getUserByEmail(loggedUser?.email as string);
+  const { twoFactorSecret } = userResult.user ?? {};
 
-  const [user] = await db
-    .select({
-      twoFactorSecret: usersTable.twoFactorSecret,
-    })
-    .from(usersTable)
-    .where(eq(usersTable.id, parseInt(session.user.id)));
-
-  if (!user) {
-    return {
-      error: true,
-      message: "User not found",
-    };
-  }
-
-  if (user.twoFactorSecret) {
-    const tokenValid = authenticator.check(token, user.twoFactorSecret);
-
+  if (twoFactorSecret as string) {
+    const tokenValid = authenticator.check(token, twoFactorSecret as string);
     if (!tokenValid) {
       return {
         error: true,
@@ -100,24 +72,19 @@ export const activate2fa = async (token: string) => {
       .set({
         twoFactorActivated: true,
       })
-      .where(eq(usersTable.id, parseInt(session.user.id)));
+      .where(eq(usersTable.id, parseInt(loggedUser?.id as string)));
   }
 };
 
 export const disable2fa = async () => {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return {
-      error: true,
-      message: "Unauthorized",
-    };
+  const loggedUser = await loggedInUser();
+  if (!loggedUser) {
+    return handleError({ name: "NotFound" });
   }
-
   await db
     .update(usersTable)
     .set({
       twoFactorActivated: false,
     })
-    .where(eq(usersTable.id, parseInt(session.user.id)));
+    .where(eq(usersTable.id, parseInt(loggedUser?.id as string)));
 };

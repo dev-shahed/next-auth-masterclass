@@ -11,52 +11,54 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Check user is authenticated or not..
-export async function isAuthenticated() {
+export async function isAuthenticated(): Promise<boolean> {
   const session = await auth();
-  const { user } = session || {};
-  try {
-    if (user !== null && user?.email && user?.id) return true;
-  } catch {
-    return false;
-  }
+  return Boolean(session?.user?.email && session.user.id);
 }
 
 export async function loggedInUser() {
   const session = await auth();
-  const { user } = session || {};
-  if (user !== null && user?.email && user?.id) return user;
+  return session?.user?.email && session.user.id ? session.user : null;
 }
 
-// Helper function: Retrieve user by ID
-export const getUserById = async (userId: number) => {
-  const [user] = await db
-    .select({
-      id: usersTable.id,
-      email: usersTable.email,
-      twoFactorSecret: usersTable.twoFactorSecret,
-    })
-    .from(usersTable)
-    .where(eq(usersTable.id, userId));
+// Retrieve a user by ID
+export const getUserByEmail = async (userEmail: string) => {
+  try {
+    const [user] = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        password: usersTable.password,
+        twoFactorSecret: usersTable.twoFactorSecret,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.email, userEmail));
 
-  if (!user) {
-    return { user: null, error: true, message: "User not found" };
+    return {
+      user: user || null,
+      error: !user,
+      message: user ? "" : "User not found",
+    };
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    return {
+      user: null,
+      error: true,
+      message: "An error occurred while retrieving the user",
+    };
   }
-  return { user, error: false, message: "" };
 };
 
-//check update password token is valid or not..
-export const IsTokenIsValid = async (token: string) => {
-  if (token) {
-    const [passwordResetToken] = await db
-      .select()
-      .from(passwordResetTokensTable)
-      .where(eq(passwordResetTokensTable.token, token));
-    const now = Date.now();
-    if (
-      passwordResetToken?.tokenExpiry &&
-      now < passwordResetToken.tokenExpiry.getTime()
-    ) {
-      return true;
-    }
-  }
+
+// Check if the password reset token is valid
+export const isTokenValid = async (token: string): Promise<boolean> => {
+  if (!token) return false;
+
+  const passwordResetToken = await db
+    .select()
+    .from(passwordResetTokensTable)
+    .where(eq(passwordResetTokensTable.token, token))
+    .then(([token]) => token || null);
+
+  return Boolean(passwordResetToken?.tokenExpiry && Date.now() < passwordResetToken.tokenExpiry.getTime());
 };
