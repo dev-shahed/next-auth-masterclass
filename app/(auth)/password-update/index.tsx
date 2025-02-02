@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { showToast } from "@/components/ui/showtoast";
+import { showToast } from "@/components/common/showtoast";
 import { useToast } from "@/hooks/use-toast";
 import { updatePassword } from "./action";
 import Link from "next/link";
@@ -48,11 +48,7 @@ export default function FormElement({ token }: Props) {
       window.location.reload();
     }
     if (!response.error) {
-      showToast(
-        toast,
-        { ...response, message: String(response.message) },
-        "success"
-      );
+      showToast(toast, response);
     } else {
       form.setError("root", {
         message: response.message as string,
@@ -64,7 +60,9 @@ export default function FormElement({ token }: Props) {
     <>
       {form.formState.isSubmitSuccessful ? (
         <div>
-          <Link className="underlined text-blue-500" href={"/login"}>Login to your account</Link>
+          <Link className="underlined text-blue-500" href={"/login"}>
+            Login to your account
+          </Link>
         </div>
       ) : (
         <Form {...form}>

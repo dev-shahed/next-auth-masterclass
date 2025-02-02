@@ -4,6 +4,7 @@ import { db } from "./db/drizzle";
 import { usersTable } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { compare } from "bcryptjs";
+import { authenticator } from "otplib";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
@@ -40,6 +41,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
           if (!passwordCorrect) {
             throw new Error("Incorrect credentials");
+          }
+          if (user.twoFactorActivated) {
+            const isValid = authenticator.check(
+              credentials.token as string,
+              user.twoFactorSecret!
+            );
+            if (!isValid) {
+              throw new Error("Incorrect OTP!");
+            }
           }
         }
 

@@ -16,7 +16,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { changePassword } from "./action";
-import { showToast } from "@/components/ui/showtoast";
+import { showToast } from "@/components/common/showtoast";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -42,11 +42,7 @@ export default function FormElement() {
     };
     const response = await changePassword(inputValue);
     if (!response.error) {
-      showToast(
-        toast,
-        { ...response, message: String(response.message) },
-        "success"
-      );
+      showToast(toast, { ...response, message: String(response.message) });
       router.push("/my-account");
     } else {
       form.setError("root", {

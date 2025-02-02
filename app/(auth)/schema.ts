@@ -45,6 +45,7 @@ export type formTypes = {
   email: string;
   password: string;
   passwordConfirm?: string;
+  token?: string;
 };
 
 // Define change password schema

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { userLogout } from "./action";
-import { showToast } from "@/components/ui/showtoast";
+import { showToast } from "@/components/common/showtoast";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LogoutBtn() {
@@ -13,18 +13,10 @@ export default function LogoutBtn() {
   const handleLogOut = async () => {
     const response = await userLogout();
     if (!response.error) {
-      showToast(
-        toast,
-        { ...response, message: String(response.message) },
-        "success"
-      );
+      showToast(toast, { ...response, message: String(response.message) });
       router.push("/login");
     } else {
-      showToast(
-        toast,
-        { ...response, message: String(response.message) },
-        "error"
-      );
+      showToast(toast, { ...response, message: String(response.message) });
     }
   };
 

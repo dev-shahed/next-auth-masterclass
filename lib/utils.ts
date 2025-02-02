@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { passwordResetTokensTable } from "@/db/passwordResetTokens";
+import { usersTable } from "@/db/usersSchema";
 import { clsx, type ClassValue } from "clsx";
 import { eq } from "drizzle-orm";
 import { twMerge } from "tailwind-merge";
@@ -23,12 +24,25 @@ export async function isAuthenticated() {
 export async function loggedInUser() {
   const session = await auth();
   const { user } = session || {};
-  try {
-    if (user !== null && user?.email && user?.id) return user;
-  } catch {
-    return null;
-  }
+  if (user !== null && user?.email && user?.id) return user;
 }
+
+// Helper function: Retrieve user by ID
+export const getUserById = async (userId: number) => {
+  const [user] = await db
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      twoFactorSecret: usersTable.twoFactorSecret,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  if (!user) {
+    return { user: null, error: true, message: "User not found" };
+  }
+  return { user, error: false, message: "" };
+};
 
 //check update password token is valid or not..
 export const IsTokenIsValid = async (token: string) => {

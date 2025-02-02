@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { registerUser } from "./action";
 import { useToast } from "@/hooks/use-toast";
-import { showToast } from "@/components/ui/showtoast";
+import { showToast } from "@/components/common/showtoast";
 import Link from "next/link";
 
 export default function Register() {
@@ -47,11 +47,7 @@ export default function Register() {
     };
     const response = await registerUser(inputValue);
     if (!response.error) {
-      showToast(
-        toast,
-        { ...response, message: String(response.message) },
-        "success"
-      );
+      showToast(toast, response);
     } else {
       form.setError("root", {
         message: response.message,
