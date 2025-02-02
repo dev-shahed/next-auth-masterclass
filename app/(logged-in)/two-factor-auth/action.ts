@@ -3,20 +3,23 @@
 import { db } from "@/db/drizzle";
 import { usersTable } from "@/db/usersSchema";
 import { handleError } from "@/lib/handleError";
-import { getUserByEmail, loggedInUser } from "@/lib/utils";
+import { loggedInUser } from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import { authenticator } from "otplib";
 import speakeasy from "speakeasy";
 
 export const get2faSecret = async () => {
   const loggedUser = await loggedInUser();
+  const [user] = await db
+    .select({
+      twoFactorSecret: usersTable.twoFactorSecret,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, parseInt(loggedUser?.id as string)));
   if (!loggedUser) {
     return handleError({ name: "NotFound" });
   }
-  const userResult = await getUserByEmail(loggedUser?.email as string);
-  const { twoFactorSecret: dbSecret } = userResult.user ?? {};
-
-  let twoFactorSecret = dbSecret;
+  let twoFactorSecret = user.twoFactorSecret;
   const token1Test = authenticator.generateSecret();
   const generatedSecret = speakeasy.generateSecret({ length: 10 });
   const token2Test = generatedSecret.base32;
@@ -52,14 +55,20 @@ export const get2faSecret = async () => {
 
 export const activate2fa = async (token: string) => {
   const loggedUser = await loggedInUser();
+  const [user] = await db
+    .select({
+      twoFactorSecret: usersTable.twoFactorSecret,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, parseInt(loggedUser?.id as string)));
   if (!loggedUser) {
     return handleError({ name: "NotFound" });
   }
-  const userResult = await getUserByEmail(loggedUser?.email as string);
-  const { twoFactorSecret } = userResult.user ?? {};
-
-  if (twoFactorSecret as string) {
-    const tokenValid = authenticator.check(token, twoFactorSecret as string);
+  if (user.twoFactorSecret as string) {
+    const tokenValid = authenticator.check(
+      token,
+      user.twoFactorSecret as string
+    );
     if (!tokenValid) {
       return {
         error: true,

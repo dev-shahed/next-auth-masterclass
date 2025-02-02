@@ -28,8 +28,6 @@ export const getUserByEmail = async (userEmail: string) => {
       .select({
         id: usersTable.id,
         email: usersTable.email,
-        password: usersTable.password,
-        twoFactorSecret: usersTable.twoFactorSecret,
       })
       .from(usersTable)
       .where(eq(usersTable.email, userEmail));
@@ -49,7 +47,6 @@ export const getUserByEmail = async (userEmail: string) => {
   }
 };
 
-
 // Check if the password reset token is valid
 export const isTokenValid = async (token: string): Promise<boolean> => {
   if (!token) return false;
@@ -60,5 +57,8 @@ export const isTokenValid = async (token: string): Promise<boolean> => {
     .where(eq(passwordResetTokensTable.token, token))
     .then(([token]) => token || null);
 
-  return Boolean(passwordResetToken?.tokenExpiry && Date.now() < passwordResetToken.tokenExpiry.getTime());
+  return Boolean(
+    passwordResetToken?.tokenExpiry &&
+      Date.now() < passwordResetToken.tokenExpiry.getTime()
+  );
 };
