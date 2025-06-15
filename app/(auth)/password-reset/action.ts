@@ -1,11 +1,13 @@
 "use server";
 import { db } from "@/db/drizzle";
-
 import { passwordResetTokensTable } from "@/db/schema";
 import { handleError } from "@/lib/handleError";
 import { mailer } from "@/lib/mail";
 import { getUserByEmail, isAuthenticated } from "@/lib/utils";
 import { randomBytes } from "crypto";
+import { render } from "@react-email/render";
+import PasswordResetEmail from "@/components/emails/PasswordResetEmail";
+
 
 export const ResetPassword = async (email: string) => {
   const findUser = await getUserByEmail(email);
@@ -18,6 +20,7 @@ export const ResetPassword = async (email: string) => {
   if (!user) {
     return handleError({ name: "UnauthorizedError" });
   }
+
   const passwordResetToken = randomBytes(32).toString("hex");
   const tokenExpiry = new Date(Date.now() + 3600000);
 
@@ -38,27 +41,30 @@ export const ResetPassword = async (email: string) => {
 
   const resetLink = `${process.env.SITE_BASE_URL}/password-update?token=${passwordResetToken}`;
 
+  // Render React Email component to HTML
+  const html = await render(PasswordResetEmail({ resetLink }));
+
+
+  // Fallback plain-text version
+  const text = `
+Dear User,
+
+We received a request to reset your password. Please use the link below to reset it:
+
+${resetLink}
+
+If you did not request this, you can safely ignore this email.
+
+Thank you,  
+My app Team
+`;
+
+  // Send email
   await mailer.sendMail({
     from: "test@resend.dev",
-    to: email, // Recipient's email address
-    subject: "Password Reset Request", // Subject line
-    text: `Dear User,
-  
-  You have requested to reset your password. Please click the link below to reset it:
-  
-   ${resetLink}
-  
-  If you did not make this request, you can safely ignore this email.
-  
-  Thank you,
-  The YourDomain Team
-  `,
-    html: `
-      <p>Dear User,</p>
-      <p>You have requested to reset your password. Please click the link below to reset it:</p>
-      <p><a href="${resetLink}" target="_blank">Reset Password</a></p>
-      <p>If you did not make this request, you can safely ignore this email.</p>
-      <p>Thank you,<br />The YourDomain Team</p>
-    `,
+    to: email,
+    subject: "Password Reset Request",
+    text,
+    html,
   });
 };
