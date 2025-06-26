@@ -7,6 +7,16 @@ import { compare } from "bcryptjs";
 import { authenticator } from "otplib";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: {
+    strategy: "jwt",
+    maxAge: 3600, // 1 hour in seconds
+  },
+  jwt: {
+    maxAge: 3600, // 1 hour in seconds
+  },
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
     jwt({ token, user }) {
       if (user) {
