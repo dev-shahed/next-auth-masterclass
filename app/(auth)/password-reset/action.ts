@@ -1,16 +1,45 @@
 "use server";
 import { db } from "@/db/drizzle";
-import { passwordResetTokensTable } from "@/db/schema";
+import { passwordResetTokensTable, usersTable } from "@/db/schema";
 import { handleError } from "@/lib/handleError";
 import { mailer } from "@/lib/mail";
-import { getUserByEmail, isAuthenticated } from "@/lib/utils";
+import { isAuthenticated } from "@/lib/utils";
 import { randomBytes } from "crypto";
 import { render } from "@react-email/render";
 import PasswordResetEmail from "@/components/emails/PasswordResetEmail";
+import { eq } from "drizzle-orm";
 
 
 export const ResetPassword = async (email: string) => {
+
+ const getUserByEmail = async (userEmail: string) => {
+    try {
+      const [user] = await db
+        .select({
+          id: usersTable.id,
+          email: usersTable.email,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.email, userEmail));
+  
+      return {
+        user: user || null,
+        error: !user,
+        message: user ? "" : "User not found",
+      };
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      return {
+        user: null,
+        error: true,
+        message: "An error occurred while retrieving the user",
+      };
+    }
+  };
+
+  // Check if the user exists
   const findUser = await getUserByEmail(email);
+
   const { user } = findUser;
   const authenticated = await isAuthenticated();
   if (authenticated) {
@@ -56,7 +85,7 @@ ${resetLink}
 If you did not request this, you can safely ignore this email.
 
 Thank you,  
-My app Team
+Task Tracker Team
 `;
 
   // Send email
